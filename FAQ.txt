@@ -1,0 +1,63 @@
+📦 Order & Shipping
+
+Q1: When will my order arrive?
+A: Orders are usually delivered within 5–7 business days. You can track your shipment in the “My Orders” section.
+
+Q2: Can I change my delivery address after placing an order?
+A: Yes, you can change your address within 12 hours of placing the order by contacting our support team.
+
+Q3: What should I do if my order hasn’t arrived yet?
+A: Please check your tracking link. If it shows no updates for more than 3 days, contact support to investigate.
+
+💸 Payments & Refunds
+
+Q4: I was charged twice for the same order. What should I do?
+A: Please contact our support team with your order ID. We’ll verify and initiate a refund for the duplicate charge within 3–5 business days.
+
+Q5: What payment methods are accepted?
+A: We accept credit/debit cards, UPI, net banking, and popular wallets like Paytm and Google Pay.
+
+Q6: How long does it take to get a refund?
+A: Refunds are processed within 3–7 business days, depending on your payment method.
+
+🧾 Returns & Cancellations
+
+Q7: What is your return policy?
+A: We offer a 7-day return policy on most items. Items must be unused and in original packaging.
+
+Q8: How do I cancel my order?
+A: You can cancel your order before it is shipped from the “My Orders” section or by contacting support.
+
+Q9: I received a damaged item. What should I do?
+A: Please upload a photo of the damaged item and contact support within 48 hours of delivery. We’ll arrange a replacement or refund.
+
+🔐 Account & Privacy
+
+Q10: How can I reset my password?
+A: Click on “Forgot Password” on the login page and follow the instructions sent to your registered email.
+
+Q11: Is my personal data safe?
+A: Yes, all personal data is encrypted and handled as per our Privacy Policy.
+
+Q12: How can I delete my account?
+A: Please email privacy@company.com
+ with the subject “Account Deletion Request.”
+
+🎁 Offers & Membership
+
+Q13: How do I apply a discount coupon?
+A: You can apply coupons at checkout in the “Apply Promo Code” box.
+
+Q14: Do you have a membership program?
+A: Yes! Members enjoy free shipping, early access to sales, and special discounts.
+
+Q15: My coupon isn’t working. Why?
+A: Coupons may expire or have usage limits. Please check the terms of the offer or contact support.
+
+⚙️ Technical Issues
+
+Q16: I can’t log in to my account. What should I do?
+A: Try resetting your password. If the issue persists, clear your browser cache or try another device.
+
+Q17: I’m not receiving order confirmation emails.
+A: Check your spam folder. If still missing, ensure your email address is correct in account settings.
