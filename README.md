@@ -26,4 +26,3 @@ Built using **LangChain**, **Groq (Qwen 3-32B)**, **FAISS**, and **Streamlit**, 
 
 ---
 
-## 📂 Folder Structure
