@@ -76,7 +76,3 @@ streamlit run app.py
 **Sentiment:** Neutral
 **Suggested response:** *You can reset your account password by clicking on “Forgot Password” on the login page and following the email verification process.*
 
----
-
-Would you like me to include a **“Demo Preview” section** (like showing screenshots or a short explanation of the UI)?
-It makes your repo look even more professional for submission.
