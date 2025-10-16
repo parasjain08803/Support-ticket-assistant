@@ -1,7 +1,3 @@
-Perfect 👍 Here’s a **clean, professional, and company-ready** `README.md` for your project — short, attractive, and easy to understand:
-
----
-
 ## 💬 Support Ticket Assistant
 
 A **Generative AI-powered chatbot** that helps classify customer support queries and generate professional responses using company FAQs — built with **LangChain**, **Groq**, and **Streamlit**.
