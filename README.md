@@ -70,9 +70,9 @@ streamlit run app.py
 
 ### 💭 Example Query
 
-**User query:** *“How can I reset my account password?”*
-**Category:** Account Management
-**Urgency:** Medium
-**Sentiment:** Neutral
-**Suggested response:** *You can reset your account password by clicking on “Forgot Password” on the login page and following the email verification process.*
+* **User query:** *“How can I reset my account password?”*
+* **Category:** Account Management
+* **Urgency:** Medium
+* **Sentiment:** Neutral
+* **Suggested response:** *You can reset your account password by clicking on “Forgot Password” on the login page and following the email verification process.*
 
