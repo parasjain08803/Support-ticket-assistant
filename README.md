@@ -63,8 +63,8 @@ streamlit run app.py
 ### 👨‍💻 Author
 
 **Paras Jain**
-📧 [LinkedIn](https://www.linkedin.com/in/parasjain)
-🌐 [GitHub](https://github.com/parasjain)
+📧 [LinkedIn](www.linkedin.com/in/paras-jain-971000299)
+🌐 [GitHub](https://github.com/parasjain08803)
 
 ---
 
