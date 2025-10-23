@@ -3,58 +3,63 @@ import re
 import streamlit as st
 from dotenv import load_dotenv
 
+# ✅ LangChain (v0.3+) imports
 from langchain_groq import ChatGroq
 from langchain_community.document_loaders import TextLoader
-from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import FAISS
+from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.embeddings import HuggingFaceEmbeddings
-
 from langchain.prompts import PromptTemplate
-from langchain.chains.combine_documents import create_stuff_documents_chain
-from langchain.chains import create_retrieval_chain
+from langchain_core.prompts import ChatPromptTemplate
 from langchain.memory import ConversationBufferMemory
+from langchain.chains import create_retrieval_chain, create_history_aware_retriever
+from langchain.chains.combine_documents import create_stuff_documents_chain
 
-# -----------------------------
-# Load Environment Variables
-# -----------------------------
+
+# -------------------------------------------------------
+# 🔑 Load environment variables
+# -------------------------------------------------------
 load_dotenv()
 os.environ["GROQ_API_KEY"] = os.getenv("GROQ_API_KEY")
 
-# -----------------------------
-# Streamlit App Setup
-# -----------------------------
-st.set_page_config(page_title="💬 Support Ticket Assistant", page_icon="💬", layout="centered")
-st.markdown("""
-    <h1 style='text-align: center; color: #3b82f6;'>💬 Support Ticket Assistant</h1>
-    <p style='text-align: center; color: gray;'>Ask your questions about company policy, billing, or technical issues.</p>
-""", unsafe_allow_html=True)
 
-# -----------------------------
-# Load and Prepare Data
-# -----------------------------
-@st.cache_resource
-def load_retriever():
-    loader = TextLoader("FAQ.txt", encoding="utf-8")
-    documents = loader.load()
-    splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=100)
-    docs = splitter.split_documents(documents)
+# -------------------------------------------------------
+# ⚙️ Load and index documents (cached)
+# -------------------------------------------------------
+@st.cache_resource(show_spinner="Indexing FAQ...")
+def load_vectorstore():
+    try:
+        loader = TextLoader("FAQ.txt", encoding="utf-8")
+        documents = loader.load()
+    except Exception as e:
+        st.error(f"❌ Error loading FAQ.txt: {e}")
+        st.stop()
 
-    embeddings = HuggingFaceEmbeddings()
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=100)
+    docs = text_splitter.split_documents(documents)
+
+    embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
     vectorstore = FAISS.from_documents(docs, embeddings)
-    retriever = vectorstore.as_retriever(search_type="similarity", search_kwargs={"k": 3})
-    return retriever
+    return vectorstore.as_retriever(search_kwargs={"k": 3})
 
-retriever = load_retriever()
 
-# -----------------------------
-# LLM Setup
-# -----------------------------
-llm = ChatGroq(model_name="qwen/qwen3-32b")
+retriever = load_vectorstore()
 
-# -----------------------------
-# Prompt Template
-# -----------------------------
-prompt_template = """
+
+# -------------------------------------------------------
+# 🧠 Initialize LLM (Groq)
+# -------------------------------------------------------
+try:
+    llm = ChatGroq(model_name="qwen/qwen3-32b")  # ✅ Stable Groq model
+except Exception as e:
+    st.error(f"❌ Error initializing LLM: {e}")
+    st.stop()
+
+
+# -------------------------------------------------------
+# 💬 Prompt Template
+# -------------------------------------------------------
+reply_prompt_template = """
 You are a professional AI support assistant.
 Analyze the customer's query and the FAQ context, then output a structured response.
 
@@ -73,26 +78,47 @@ Sentiment: <positive / neutral / negative>
 Suggested response: <polite, clear reply to customer>
 """
 
-prompt = PromptTemplate(
-    template=prompt_template,
+reply_prompt = PromptTemplate(
+    template=reply_prompt_template,
     input_variables=["context", "input"]
 )
 
-# -----------------------------
-# Chain Setup (Stuff + Retrieval)
-# -----------------------------
-document_chain = create_stuff_documents_chain(llm, prompt)
-retrieval_chain = create_retrieval_chain(retriever, document_chain)
 
-# -----------------------------
-# Chat Memory
-# -----------------------------
+
+# -------------------------------------------------------
+# 🧩 Build retrieval + memory chain
+# -------------------------------------------------------
 if "memory" not in st.session_state:
     st.session_state.memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
+memory = st.session_state.memory
 
-# -----------------------------
-# Chat Interface
-# -----------------------------
+# Step 1: Create document chain (stuff)
+document_chain = create_stuff_documents_chain(llm, reply_prompt)
+
+# Step 2: Make retriever aware of conversation history
+history_aware_retriever = create_history_aware_retriever(
+    llm=llm,
+    retriever=retriever,
+    prompt=ChatPromptTemplate.from_messages([
+        ("system", "Use the chat history to better understand follow-up questions."),
+        ("human", "{input}")
+    ])
+)
+
+# Step 3: Create full retrieval chain
+retrieval_chain = create_retrieval_chain(history_aware_retriever, document_chain)
+
+
+# -------------------------------------------------------
+# 🖥️ Streamlit UI
+# -------------------------------------------------------
+st.set_page_config(page_title="Support Ticket Assistant", page_icon="💬", layout="centered")
+
+st.markdown("""
+    <h1 style='text-align: center; color: #3b82f6;'>💬 Support Ticket Assistant</h1>
+    <p style='text-align: center; color: gray;'>Ask your questions about company policy, billing, or technical issues.</p>
+""", unsafe_allow_html=True)
+
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
 
@@ -102,6 +128,10 @@ for msg in st.session_state.chat_history:
 
 user_query = st.chat_input("💬 Type your question here...")
 
+
+# -------------------------------------------------------
+# 🤖 Chat handling
+# -------------------------------------------------------
 if user_query:
     with st.chat_message("user"):
         st.markdown(user_query)
@@ -109,9 +139,14 @@ if user_query:
 
     with st.chat_message("assistant"):
         with st.spinner("Thinking..."):
-            result = retrieval_chain.invoke({"input": user_query})
-            llm_answer = result["answer"]
+            try:
+                result = retrieval_chain.invoke({"input": user_query, "chat_history": memory.chat_memory})
+                llm_answer = result["answer"]
+            except Exception as e:
+                st.error(f"⚠️ Error: {e}")
+                st.stop()
 
+            # Clean LLM output
             def clean_response(text):
                 text = re.sub(r"<think>.*?</think>", "", text, flags=re.DOTALL)
                 text = re.sub(r"<[^>]+>", "", text)
