@@ -1,8 +1,8 @@
 langchain
-langchain_community
-langchain_core
+langchain-community
+langchain-core
 python-dotenv
-langchain_groq
+langchain-groq
 streamlit
 sentence-transformers
 faiss-cpu
