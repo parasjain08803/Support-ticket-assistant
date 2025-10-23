@@ -2,7 +2,7 @@ import os
 import re
 import streamlit as st
 from dotenv import load_dotenv
-from langchain.chains.conversational_retrieval.base import ConversationalRetrievalChain
+from langchain.chains import ConversationalRetrievalChain
 from langchain.memory import ConversationBufferMemory
 from langchain.prompts import PromptTemplate
 from langchain_community.document_loaders import TextLoader
@@ -10,9 +10,6 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import FAISS
 from langchain.embeddings import HuggingFaceEmbeddings
 from langchain_groq import ChatGroq
-import langchain
-print("LangChain version:", langchain.__version__)
-
 
 load_dotenv()
 os.environ["GROQ_API_KEY"] = os.getenv("GROQ_API_KEY")
