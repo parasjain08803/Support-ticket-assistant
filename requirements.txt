@@ -7,4 +7,3 @@ streamlit
 sentence-transformers
 faiss-cpu
 langchain-huggingface
-langchain-memory
