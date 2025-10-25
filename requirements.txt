@@ -1,21 +1,21 @@
-# --- LangChain ecosystem (modular version) ---
+# --- LangChain core ecosystem ---
 langchain==1.0.1
-langchain-core==1.0.1
-langchain-community==1.0.1
-langchain-text-splitters==0.0.1
-langchain-huggingface==0.0.1
-langchain-memory==0.0.1
-langchain-groq==0.0.1
+langchain-core
+langchain-community
+langchain-text-splitters
+langchain-huggingface
+langchain-memory
+langchain-groq
 
-# --- NLP / Embeddings / Vector Store ---
-sentence-transformers==3.0.1
-faiss-cpu==1.8.0
+# --- NLP / Vector store ---
+sentence-transformers
+faiss-cpu
 
-# --- Environment / Web App ---
-python-dotenv==1.0.1
-streamlit==1.38.0
+# --- Environment & App ---
+python-dotenv
+streamlit
 
-# --- Optional but recommended for stability ---
-tiktoken==0.7.0
-pydantic==2.8.2
-requests==2.32.3
+# --- Internal dependencies ---
+tiktoken
+pydantic
+requests
