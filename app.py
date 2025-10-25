@@ -3,18 +3,16 @@ import re
 import streamlit as st
 from dotenv import load_dotenv
 
-# ✅ LangChain (v0.3+) imports
+# ✅ LangChain imports (modern)
 from langchain_groq import ChatGroq
 from langchain_community.document_loaders import TextLoader
 from langchain_community.vectorstores import FAISS
-from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_huggingface.embeddings import HuggingFaceEmbeddings
 from langchain_core.prompts import PromptTemplate, ChatPromptTemplate
-from langchain_community.memory import ConversationBufferMemory
+from langchain.memory.buffer import ConversationBufferMemory
 from langchain.chains import create_retrieval_chain, create_history_aware_retriever
 from langchain.chains.combine_documents import create_stuff_documents_chain
-
-
 
 # -------------------------------------------------------
 # 🔑 Load environment variables
@@ -22,42 +20,30 @@ from langchain.chains.combine_documents import create_stuff_documents_chain
 load_dotenv()
 os.environ["GROQ_API_KEY"] = os.getenv("GROQ_API_KEY")
 
-
 # -------------------------------------------------------
 # ⚙️ Load and index documents (cached)
 # -------------------------------------------------------
-@st.cache_resource(show_spinner="Indexing FAQ...")
+@st.cache_resource
 def load_vectorstore():
-    try:
-        loader = TextLoader("FAQ.txt", encoding="utf-8")
-        documents = loader.load()
-    except Exception as e:
-        st.error(f"❌ Error loading FAQ.txt: {e}")
-        st.stop()
+    loader = TextLoader("FAQ.txt", encoding="utf-8")
+    documents = loader.load()
 
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=100)
     docs = text_splitter.split_documents(documents)
 
-    embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
+    embeddings = HuggingFaceEmbeddings()
     vectorstore = FAISS.from_documents(docs, embeddings)
     return vectorstore.as_retriever(search_kwargs={"k": 3})
 
-
 retriever = load_vectorstore()
-
 
 # -------------------------------------------------------
 # 🧠 Initialize LLM (Groq)
 # -------------------------------------------------------
-try:
-    llm = ChatGroq(model_name="qwen/qwen3-32b")  # ✅ Stable Groq model
-except Exception as e:
-    st.error(f"❌ Error initializing LLM: {e}")
-    st.stop()
-
+llm = ChatGroq(model_name="qwen/qwen3-32b")
 
 # -------------------------------------------------------
-# 💬 Prompt Template
+# 💬 Prompt Template (fixed variable names)
 # -------------------------------------------------------
 reply_prompt_template = """
 You are a professional AI support assistant.
@@ -83,31 +69,28 @@ reply_prompt = PromptTemplate(
     input_variables=["context", "input"]
 )
 
-
-
 # -------------------------------------------------------
-# 🧩 Build retrieval + memory chain
+# 🧩 Build retrieval + memory chain (LangChain v0.3 style)
 # -------------------------------------------------------
 if "memory" not in st.session_state:
     st.session_state.memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
 memory = st.session_state.memory
 
-# Step 1: Create document chain (stuff)
+# Step 1: Create document chain
 document_chain = create_stuff_documents_chain(llm, reply_prompt)
 
-# Step 2: Make retriever aware of conversation history
+# Step 2: History-aware retriever
 history_aware_retriever = create_history_aware_retriever(
     llm=llm,
     retriever=retriever,
     prompt=ChatPromptTemplate.from_messages([
-        ("system", "Use the chat history to better understand follow-up questions."),
+        ("system", "Use the chat history to improve query understanding."),
         ("human", "{input}")
     ])
 )
 
-# Step 3: Create full retrieval chain
+# Step 3: Combine both into full retrieval chain
 retrieval_chain = create_retrieval_chain(history_aware_retriever, document_chain)
-
 
 # -------------------------------------------------------
 # 🖥️ Streamlit UI
@@ -128,7 +111,6 @@ for msg in st.session_state.chat_history:
 
 user_query = st.chat_input("💬 Type your question here...")
 
-
 # -------------------------------------------------------
 # 🤖 Chat handling
 # -------------------------------------------------------
@@ -139,14 +121,15 @@ if user_query:
 
     with st.chat_message("assistant"):
         with st.spinner("Thinking..."):
-            try:
-                result = retrieval_chain.invoke({"input": user_query, "chat_history": memory.chat_memory})
-                llm_answer = result["answer"]
-            except Exception as e:
-                st.error(f"⚠️ Error: {e}")
-                st.stop()
+           # Run retrieval chain
+            result = retrieval_chain.invoke({"input": user_query, "chat_history": memory.chat_memory.messages})
+            llm_answer = result["answer"]
 
-            # Clean LLM output
+            # Save to memory
+            memory.save_context({"input": user_query}, {"output": llm_answer})
+
+
+            # Clean unwanted tags
             def clean_response(text):
                 text = re.sub(r"<think>.*?</think>", "", text, flags=re.DOTALL)
                 text = re.sub(r"<[^>]+>", "", text)
