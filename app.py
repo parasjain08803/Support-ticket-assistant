@@ -1,3 +1,5 @@
+import langchain
+print("LangChain version:", langchain.__version__)
 import os
 import re
 import streamlit as st
