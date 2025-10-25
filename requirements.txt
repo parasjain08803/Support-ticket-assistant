@@ -1,7 +1,9 @@
-# --- Core LangChain packages ---
+# --- Core LangChain ---
 langchain==1.0.1
 langchain-core==1.0.1
-langchain-community==1.0.1
+langchain-community==0.3.0
+
+# --- Groq Integration ---
 langchain-groq==0.1.3
 
 # --- Text Splitters & Embeddings ---
@@ -13,7 +15,8 @@ faiss-cpu==1.8.0
 python-dotenv==1.0.1
 streamlit==1.38.0
 
-# --- Optional Stability ---
+# --- Utilities ---
 tiktoken==0.7.0
-pydantic==2.8.2
 requests==2.32.3
+pydantic==2.8.2
+numpy<2
